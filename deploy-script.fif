@@ -1,0 +1,27 @@
+#!/usr/bin/env fift -s
+"TonUtil.fif" include
+"Asm.fif" include
+
+
+{ ."usage: " @' $0 type ." <workchain-id> <required_keys_number> <keys_number> <public_key1> .. <public_key_keys_number>" cr
+  ."Creates a new multisig contract in specified workchain that requires <required_keys_number> of <keys_numbers> to make a transfer" cr
+  1 halt
+} : usage
+
+$# 4 < { usage } if
+
+$1 parse-workchain-id =: workchain_id
+$2 parse-int =: required_keys
+$3 parse-int =: keys_number
+
+."workchain_id = " workchain_id . cr
+."required_keys = " required_keys . cr
+."keys_number = " keys_number . cr
+
+$# 3 - =: actual_public_keys
+
+keys_number actual_public_keys > { ."Passed public keys number is too small" cr 1 halt } if
+
+
+3 {  1 + dup  $# - } { dup $() type ." " } while
+$() type

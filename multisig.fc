@@ -1,0 +1,30 @@
+;; storage (seqno, required_number, key_count, public_keys: {num -> public_key}, messages: {expir_time -> {to_address, amount (tranfer body??), bin_number}}}
+
+cell get_data() asm "c4 PUSH";
+slice begin_parse(cell c) asm "CTOS";
+(slice, cell) load_dict(slice s) asm( -> 1 0) "LDDICT";
+(int, slice, int) udict_get_next?(cell dict, int key_len, int pivot) asm(pivot dict key_len -> 1 0 2) "DICTUGETNEXT" "NULLSWAPIFNOT" "NULLSWAPIFNOT";
+
+int required_number() method_id {
+  var data = get_data().begin_parse();
+  (_, var required_number) = (data~load_int(32), data~load_int(32));
+
+  return required_number;
+}
+
+_ public_keys() method_id {
+  var data = get_data().begin_parse();
+  (_, _, var public_keys) = (data~load_int(32), data~load_int(32), data~load_dict());
+
+  var l = nil;
+  var id = 0;
+
+  do {
+    (id, var public_key, var f) = public_keys.udict_get_next?(32, id);
+    if (f) {
+      l = cons(public_key~load_bits(512), l);
+    }
+  } until (~ f);
+
+  return l;
+}
