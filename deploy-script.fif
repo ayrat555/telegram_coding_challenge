@@ -22,6 +22,9 @@ $# 3 - =: actual_public_keys
 
 keys_number actual_public_keys > { ."Passed public keys number is too small" cr 1 halt } if
 
+// fetching public keys to list
+null 3 {  1 + dup  $# - } { dup $() rot cons swap } while
+$() swap cons
+=: public_keys_list
 
-3 {  1 + dup  $# - } { dup $() type ." " } while
-$() type
+// creating public keys dict
