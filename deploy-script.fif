@@ -13,6 +13,8 @@ $1 parse-workchain-id =: workchain_id
 $2 parse-int =: required_keys
 $3 parse-int =: keys_number
 
+"multisig_wallet" =: multisig_wallet_file
+
 ."workchain_id = " workchain_id . cr
 ."required_keys = " required_keys . cr
 ."keys_number = " keys_number . cr
@@ -34,3 +36,134 @@ $() swap cons
 =: public_keys_list
 
 public_keys_list { dup car add_public_key cdr } keys_number times
+
+drop
+
+PROGRAM{
+  68762 DECLMETHOD required_number
+  DECLPROC recv_internal
+  DECLPROC recv_external
+  112296 DECLMETHOD public_keys
+  required_number PROC:<{
+    c4 PUSH
+    CTOS
+    32 LDI
+    NIP
+    32 LDI
+    DROP
+  }>
+  recv_internal PROC:<{
+    DROP
+  }>
+  recv_external PROC:<{
+    9 PUSHPOW2
+    LDSLICEX
+    DUP
+    32 LDU
+    32 LDU
+    NOW
+    s1 s2 XCHG
+    LESS
+    35 THROWIF
+    c4 PUSH
+    CTOS
+    32 LDU
+    256 LDU
+    ENDS
+    s3 s1 XCPU
+    EQUAL
+    33 THROWIFNOT
+    s0 s3 XCHG
+    HASHSU
+    s0 s4 s2 XC2PU
+    CHKSIGNU
+    34 THROWIFNOT
+    ACCEPT
+    s0 s2 XCHG
+    WHILE:<{
+      DUP
+      SREFS
+    }>DO<{
+      8 LDU
+      LDREF
+      s0 s2 XCHG
+      SENDRAWMSG
+    }>
+    ENDS
+    INC
+    NEWC
+    32 STU
+    256 STU
+    ENDC
+    c4 POP
+  }>
+  public_keys PROC:<{
+    c4 PUSH
+    CTOS
+    32 LDI
+    NIP
+    32 LDI
+    NIP
+    LDDICT
+    DROP
+    PUSHNULL
+    0 PUSHINT
+    UNTIL:<{
+      s2 PUSH
+      32 PUSHINT
+      DICTUGETNEXT
+      NULLSWAPIFNOT
+      NULLSWAPIFNOT
+      DUP
+      IF:<{
+        s0 s2 XCHG
+        9 PUSHPOW2
+        LDSLICEX
+        DROP
+        s0 s3 XCHG2
+        CONS
+      }>ELSE<{
+        2SWAP
+        DROP
+      }>
+      SWAP
+      NOT
+      s1 s2 XCHG
+    }>
+    DROP
+    NIP
+  }>
+
+}END>c
+// code
+<b 0 32 u,
+   required_keys 32 u,
+   keys_number 32 u,
+   multisig_wallet_file +".pk" load-generate-keypair constant wallet_pk B, b> // data
+null // no libraries
+<b b{0011} s, 3 roll ref, rot ref, swap dict, b>  // create StateInit
+.s
+dup ."StateInit: " <s csr. cr
+dup hash workchain_id swap 2dup 2constant wallet_addr
+."new wallet address = " 2dup .addr cr
+2dup multisig_wallet_file +".addr" save-address-verbose
+."Non-bounceable address (for init): " 2dup 7 .Addr cr
+."Bounceable address (for later access): " 6 .Addr cr
+cr
+."hererererer" cr
+.s
+
+<b 0 32 u, b>
+dup ."signing message: "  <s csr. cr
+
+dup  hash wallet_pk ed25519_sign_uint .s cr cr rot
+
+<b b{1000100} s, wallet_addr addr, b{000010} s, .s cr swap <s s, b{0} s, swap B, swap <s s, b>
+
+dup ."External message for initialization is " <s csr. cr
+2 boc+>B dup Bx. cr
+multisig_wallet_file +"-query.boc" tuck B>file
+."(Saved wallet creating query to file " type .")" cr
+
+."last"
+.s
