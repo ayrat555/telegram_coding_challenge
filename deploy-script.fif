@@ -2,7 +2,6 @@
 "TonUtil.fif" include
 "Asm.fif" include
 
-
 { ."usage: " @' $0 type ." <workchain-id> <required_keys_number> <keys_number> <public_key1> .. <public_key_keys_number>" cr
   ."Creates a new multisig contract in specified workchain that requires <required_keys_number> of <keys_numbers> to make a transfer" cr
   1 halt
@@ -22,9 +21,16 @@ $# 3 - =: actual_public_keys
 
 keys_number actual_public_keys > { ."Passed public keys number is too small" cr 1 halt } if
 
+dictnew 0 2constant public_keys_dict
+{ @' public_keys_dict } : public_keys_dict@
+{ public_keys_dict@ nip } : public_key#
+
+{ <b swap $, b> <s  public_keys_dict@ swap 16  udict!+  drop public_key# 1+  2 'nop does : public_keys_dict } : add_public_key
+
+
 // fetching public keys to list
-null 3 {  1 + dup  $# - } { dup $() rot cons swap } while
+null 3 {  1 + dup  $# - } { dup $() rot cons swap  } while
 $() swap cons
 =: public_keys_list
 
-// creating public keys dict
+public_keys_list { dup car add_public_key cdr } keys_number times
