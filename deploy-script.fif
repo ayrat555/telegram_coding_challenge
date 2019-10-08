@@ -13,7 +13,7 @@ $1 parse-workchain-id =: workchain_id
 $2 parse-int =: required_keys
 $3 parse-int =: keys_number
 
-"multisig_wallet" =: multisig_wallet_file
+"multisig_wallet5" =: multisig_wallet_file
 
 ."workchain_id = " workchain_id . cr
 ."required_keys = " required_keys . cr
@@ -40,15 +40,13 @@ public_keys_list { dup car add_public_key cdr } keys_number times
 drop
 
 PROGRAM{
+  // automatically generated from `./multisig/multisig.fc`
   68762 DECLMETHOD required_number
   DECLPROC recv_internal
   DECLPROC recv_external
-  112296 DECLMETHOD public_keys
   required_number PROC:<{
     c4 PUSH
     CTOS
-    32 LDI
-    NIP
     32 LDI
     DROP
   }>
@@ -60,30 +58,26 @@ PROGRAM{
     LDSLICEX
     DUP
     32 LDU
-    32 LDU
-    NOW
-    s1 s2 XCHG
-    LESS
-    35 THROWIF
     c4 PUSH
     CTOS
     32 LDU
     256 LDU
+    32 LDU
+    32 LDU
+    LDREF
     ENDS
-    s3 s1 XCPU
+    s6 s4 XCPU
     EQUAL
     33 THROWIFNOT
-    s0 s3 XCHG
+    s0 s6 XCHG
     HASHSU
-    s0 s4 s2 XC2PU
+    s0 s7 s2 XC2PU
     CHKSIGNU
     34 THROWIFNOT
     ACCEPT
-    s0 s2 XCHG
-    WHILE:<{
-      DUP
-      SREFS
-    }>DO<{
+    s2 s0 XCPU
+    SREFS
+    IF:<{
       8 LDU
       LDREF
       s0 s2 XCHG
@@ -94,52 +88,21 @@ PROGRAM{
     NEWC
     32 STU
     256 STU
+    s1 s3 XCHG
+    32 STU
+    32 STU
+    STREF
     ENDC
     c4 POP
   }>
-  public_keys PROC:<{
-    c4 PUSH
-    CTOS
-    32 LDI
-    NIP
-    32 LDI
-    NIP
-    LDDICT
-    DROP
-    PUSHNULL
-    0 PUSHINT
-    UNTIL:<{
-      s2 PUSH
-      32 PUSHINT
-      DICTUGETNEXT
-      NULLSWAPIFNOT
-      NULLSWAPIFNOT
-      DUP
-      IF:<{
-        s0 s2 XCHG
-        9 PUSHPOW2
-        LDSLICEX
-        DROP
-        s0 s3 XCHG2
-        CONS
-      }>ELSE<{
-        2SWAP
-        DROP
-      }>
-      SWAP
-      NOT
-      s1 s2 XCHG
-    }>
-    DROP
-    NIP
-  }>
-
 }END>c
 // code
 <b 0 32 u,
+   multisig_wallet_file +".pk" load-generate-keypair constant wallet_pk .s B, ."genere" .s
    required_keys 32 u,
    keys_number 32 u,
-   multisig_wallet_file +".pk" load-generate-keypair constant wallet_pk B, b> // data
+   public_keys_dict@ drop .s ref, .s
+   b> // data
 null // no libraries
 <b b{0011} s, 3 roll ref, rot ref, swap dict, b>  // create StateInit
 .s
@@ -153,7 +116,8 @@ cr
 ."hererererer" cr
 .s
 
-<b 0 32 u, b>
+<b 0 32 u,
+   b>
 dup ."signing message: "  <s csr. cr
 
 dup  hash wallet_pk ed25519_sign_uint .s cr cr rot
