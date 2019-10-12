@@ -1,0 +1,21 @@
+#!/usr/bin/env fift -s
+"TonUtil.fif" include
+"Asm.fif" include
+
+PROGRAM{ "money_sender.fif" include }END>s constant code // code
+"init_data.boc" file>B B>boc constant storage // data
+
+
+// let's send an empty message and check that seqno is changed in storage
+
+<b b> <s constant empty_message
+
+empty_message -1 code storage runvm
+
+cr ."Storage after empty message: " <s 32 i@  .
+
+// let's send value transfer message
+
+"send_value_message.boc" file>B B>boc <s constant value_message
+
+value_message -1 code storage runvm

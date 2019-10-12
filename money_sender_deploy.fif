@@ -1,0 +1,66 @@
+#!/usr/bin/env fift -s
+"TonUtil.fif" include
+"Asm.fif" include
+
+{ ."usage: " @' $0 type ." <workchain-id>" cr
+  ."Deploys money sender" cr
+  1 halt
+} : usage
+
+$# 1 < { usage } if
+
+$1 parse-workchain-id =: workchain_id
+
+PROGRAM{
+  // automatically generated from `./money_sender.fc`
+  DECLPROC recv_internal
+  DECLPROC recv_external
+  recv_internal PROC:<{
+    DROP
+  }>
+  recv_external PROC:<{
+    ACCEPT
+    DUP
+    SREFS
+    IF:<{
+      8 LDU
+      LDREF
+      s0 s2 XCHG
+      SENDRAWMSG
+    }>
+    ENDS
+    0 PUSHINT
+    NEWC
+    32 STU
+    ENDC
+    c4 POP
+  }>
+}END>c
+// code
+<b 0 32 u, b> // data
+
+dup .s
+2 boc+>B dup Bx. cr
+"init_data.boc" tuck B>file
+drop
+cr ."After boc" cr
+.s
+
+null // no libraries
+
+
+<b b{0011} s, 3 roll ref, rot ref, swap dict, b>  // create StateInit
+
+dup ."StateInit: " <s csr. cr
+dup hash workchain_id swap 2dup 2constant wallet_addr
+."new wallet address = " 2dup .addr cr
+2dup "sender.addr" save-address-verbose
+."Non-bounceable address (for init): " 2dup 7 .Addr cr
+."Bounceable address (for later access): " 6 .Addr cr
+
+<b b{1000100} s, wallet_addr addr, b{000010} s, swap <s s, b{0} s,  b>
+
+ dup ."External message for initialization is " <s csr. cr
+ 2 boc+>B dup Bx. cr
+ "create-money-sender-query.boc" tuck B>file
+ ."(Saved wallet creating query to file " type .")" cr

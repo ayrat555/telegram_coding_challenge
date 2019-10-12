@@ -1,0 +1,27 @@
+// automatically generated from `./money_sender.fc` 
+DECLPROC recv_internal
+DECLPROC recv_external
+recv_internal PROC:<{
+  DROP
+}>
+recv_external PROC:<{
+  ACCEPT
+  c4 PUSH
+  CTOS
+  32 LDU
+  ENDS
+  s1 s0 XCPU
+  SREFS
+  IF:<{
+    8 LDU
+    LDREF
+    s0 s2 XCHG
+    SENDRAWMSG
+  }>
+  ENDS
+  INC
+  NEWC
+  32 STU
+  ENDC
+  c4 POP
+}>
