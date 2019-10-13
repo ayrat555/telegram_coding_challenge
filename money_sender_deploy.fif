@@ -12,29 +12,7 @@ $# 1 < { usage } if
 $1 parse-workchain-id =: workchain_id
 
 PROGRAM{
-  // automatically generated from `./money_sender.fc`
-  DECLPROC recv_internal
-  DECLPROC recv_external
-  recv_internal PROC:<{
-    DROP
-  }>
-  recv_external PROC:<{
-    ACCEPT
-    DUP
-    SREFS
-    IF:<{
-      8 LDU
-      LDREF
-      s0 s2 XCHG
-      SENDRAWMSG
-    }>
-    ENDS
-    0 PUSHINT
-    NEWC
-    32 STU
-    ENDC
-    c4 POP
-  }>
+  "money_sender.fif" include
 }END>c
 // code
 <b 0 32 u, b> // data

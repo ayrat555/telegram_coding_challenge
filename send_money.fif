@@ -14,7 +14,7 @@ $2 true parse-load-address =: bounce 2=: dest_addr
 
 // "0QAu6bT9Twd8myIygMNXY9-e2rC0GsINNvQAlnfflcOv4uVb" true parse-load-address =: wallet_bounce 2=: wallet_addr
 
-Masterchain 0xB0BD8543BFD71549988A2C4DDAC1EFE65C6D655F22968132990897E7E040F97C
+Masterchain 0x2E932B8BFC23F7CD0455FF0848CFCCB9E95EB0BA62D93883A665F61612F345AC
 2constant wallet_addr
  ."Test giver address = " wallet_addr 2dup .addr cr 6 .Addr cr
 
@@ -25,14 +25,16 @@ cr ."Transferring " amount .
 <b b{01} s, bounce 1 i, b{000100} s, dest_addr addr,
   amount Gram, 0 9 64 32 + + 1+ 1+ u, 0 32 u, "GIFT" $, b>
 
+
+
+<b 1 8 u, swap ref, b> .s
+
 ."Before killing " cr
 .s
 dup
 2 boc+>B dup Bx. cr
 "send_value_message.boc" tuck B>file
 drop
-
-<b swap ref, b> .s
 
 <b b{1000100} s, wallet_addr addr, 0 Gram, b{00} s,
    swap <s s, b>
