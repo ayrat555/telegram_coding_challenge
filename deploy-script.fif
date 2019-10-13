@@ -13,7 +13,7 @@ $1 parse-workchain-id =: workchain_id
 $2 parse-int =: required_keys
 $3 parse-int =: keys_number
 
-"multisig_wallet5" =: multisig_wallet_file
+"multisig_wallet" =: multisig_wallet_file
 
 ."workchain_id = " workchain_id . cr
 ."required_keys = " required_keys . cr
@@ -40,69 +40,24 @@ public_keys_list { dup car add_public_key cdr } keys_number times
 drop
 
 PROGRAM{
-  // automatically generated from `./multisig/multisig.fc`
-  68762 DECLMETHOD required_number
-  DECLPROC recv_internal
-  DECLPROC recv_external
-  required_number PROC:<{
-    c4 PUSH
-    CTOS
-    32 LDI
-    DROP
-  }>
-  recv_internal PROC:<{
-    DROP
-  }>
-  recv_external PROC:<{
-    9 PUSHPOW2
-    LDSLICEX
-    DUP
-    32 LDU
-    c4 PUSH
-    CTOS
-    32 LDU
-    256 LDU
-    32 LDU
-    32 LDU
-    LDREF
-    ENDS
-    s6 s4 XCPU
-    EQUAL
-    33 THROWIFNOT
-    s0 s6 XCHG
-    HASHSU
-    s0 s7 s2 XC2PU
-    CHKSIGNU
-    34 THROWIFNOT
-    ACCEPT
-    s2 s0 XCPU
-    SREFS
-    IF:<{
-      8 LDU
-      LDREF
-      s0 s2 XCHG
-      SENDRAWMSG
-    }>
-    ENDS
-    INC
-    NEWC
-    32 STU
-    256 STU
-    s1 s3 XCHG
-    32 STU
-    32 STU
-    STREF
-    ENDC
-    c4 POP
-  }>
+"multisig.fif" include
 }END>c
 // code
 <b 0 32 u,
-   multisig_wallet_file +".pk" load-generate-keypair constant wallet_pk .s B, ."genere" .s
    required_keys 32 u,
    keys_number 32 u,
-   public_keys_dict@ drop .s ref, .s
+   public_keys_dict@ drop .s dict, .s
+   dictnew dict,
    b> // data
+
+dup .s
+2 boc+>B dup Bx. cr
+"init_data.boc" tuck B>file
+drop
+cr ."After boc" cr
+.s
+
+
 null // no libraries
 <b b{0011} s, 3 roll ref, rot ref, swap dict, b>  // create StateInit
 .s
@@ -116,18 +71,11 @@ cr
 ."hererererer" cr
 .s
 
-<b 0 32 u,
-   b>
-dup ."signing message: "  <s csr. cr
+<b 0 32 u, b>
 
-dup  hash wallet_pk ed25519_sign_uint .s cr cr rot
-
-<b b{1000100} s, wallet_addr addr, b{000010} s, .s cr swap <s s, b{0} s, swap B, swap <s s, b>
+<b b{1000100} s, wallet_addr addr, b{000010} s, .s cr swap <s s, b{0} s, swap <s s, b>
 
 dup ."External message for initialization is " <s csr. cr
 2 boc+>B dup Bx. cr
 multisig_wallet_file +"-query.boc" tuck B>file
 ."(Saved wallet creating query to file " type .")" cr
-
-."last"
-.s

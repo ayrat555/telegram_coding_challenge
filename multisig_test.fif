@@ -1,0 +1,25 @@
+#!/usr/bin/env fift -s
+"TonUtil.fif" include
+"Asm.fif" include
+
+PROGRAM{ "multisig.fif" include }END>s constant code // code
+"init_data.boc" file>B B>boc constant storage // data
+
+//  let's send an empty message and check that seqno is changed in storage
+
+<b 0 32 u, b> <s constant empty_message
+
+<b b> 79825 code storage runvm .s
+
+
+
+// cr ."Storage after empty message: " <s 32 i@  . drop .s cr
+//
+// // let's send value transfer message
+//
+// "send_value_message.boc" file>B B>boc <s constant value_message
+//
+// value_message -1 code storage runvm .s
+//
+// cr ."Storage after value transfer message: " <s 32 i@  . drop .s cr
+//
