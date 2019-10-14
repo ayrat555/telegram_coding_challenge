@@ -130,6 +130,14 @@ int required_number() method_id {
 
   cs2.end_parse();
 
+  if (cs.slice_refs()) {
+
+
+     ;; add order
+     ;; garbage_collect old orders
+     ;; send orders if enough signatures
+   }
+
   set_data(begin_cell()
    .store_uint(stored_seqno + 1, 32)
    .store_uint(required_keys_number, 32)
@@ -166,21 +174,3 @@ int all_keys_number() method_id {
 
   return all_keys_number;
 }
-
-;; _ public_keys() method_id {
-;;    var data = get_data().begin_parse();
-;;    (_, _, var public_keys_ref) = (data~load_int(32), data~load_int(32), data~load_ref());
-;;
-;;
-;;    var l = nil;
-;;    var id = 0;
-;;
-;;    do {
-;;      (id, var public_key, var f) = public_keys.udict_get_next?(32, id);
-;;      if (f) {
-;;        l = cons(public_key~load_bits(512), l);
-;;      }
-;;    } until (~ f);
-;;
-;;    return l;
-;; }

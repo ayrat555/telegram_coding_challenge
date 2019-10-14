@@ -1,0 +1,89 @@
+// automatically generated from `./multisig.fc` 
+68762 DECLMETHOD required_number
+DECLPROC recv_internal
+DECLPROC recv_external
+85143 DECLMETHOD seqno
+79825 DECLMETHOD required_keys_number
+76640 DECLMETHOD all_keys_number
+required_number PROC:<{
+  c4 PUSH
+  CTOS
+  32 LDI
+  DROP
+}>
+recv_internal PROC:<{
+  DROP
+}>
+recv_external PROC:<{
+  32 LDU
+  c4 PUSH
+  CTOS
+  32 LDU
+  s3 s1 XCPU
+  EQUAL
+  33 THROWIFNOT
+  ACCEPT
+  s0 s2 XCHG
+  32 LDU
+  32 LDU
+  LDDICT
+  LDDICT
+  ENDS
+  s0 s4 XCHG
+  SREFS
+  DROP
+  s0 s4 XCHG
+  INC
+  NEWC
+  32 STU
+  s1 s2 XCHG
+  32 STU
+  32 STU
+  s1 s2 XCHG
+  STDICT
+  STDICT
+  ENDC
+  c4 POP
+}>
+seqno PROC:<{
+  c4 PUSH
+  CTOS
+  32 LDU
+  32 LDU
+  NIP
+  32 LDU
+  NIP
+  LDDICT
+  NIP
+  LDDICT
+  NIP
+  ENDS
+}>
+required_keys_number PROC:<{
+  c4 PUSH
+  CTOS
+  32 LDU
+  NIP
+  32 LDU
+  32 LDU
+  NIP
+  LDDICT
+  NIP
+  LDDICT
+  NIP
+  ENDS
+}>
+all_keys_number PROC:<{
+  c4 PUSH
+  CTOS
+  32 LDU
+  NIP
+  32 LDU
+  NIP
+  32 LDU
+  LDDICT
+  NIP
+  LDDICT
+  NIP
+  ENDS
+}>
